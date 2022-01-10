@@ -9,28 +9,50 @@ import (
 
 // GiftRecRecordList 收礼流水查询
 func GiftRecRecordList(w http.ResponseWriter, req *http.Request) {
-	// 解析入参
-	anchorId, page, limit := handleArgs(req)
-	result := model.GetGiftRecRecordListByAnchorId(anchorId, page, limit)
-	Success(w, result)
+	defer func() {
+		if err := recover(); err != nil {
+			Failure(w, err)
+		}
+	}()
+	// 解析并校验入参
+	anchorId, page, limit := parseAndVerifyArgs(req)
+	result, err := model.GetGiftRecRecordListByAnchorId(anchorId, page, limit)
+	if err != nil {
+		Failure(w, err)
+	} else {
+		Success(w, result)
+	}
 }
 
-func handleArgs(req *http.Request) (int, int, int) {
+func parseAndVerifyArgs(req *http.Request) (anchorId, page, limit int) {
+	defaultPage := 1
+	defaultLimit := 10
+
 	values := req.URL.Query()
+
 	var anchorIdStr = values.Get("anchorId")
 	anchorId, err := strconv.Atoi(anchorIdStr)
 	if err != nil {
-		log.Panicln("anchorId parse failed", err)
+		log.Panic("wrong parameter anchorId")
 	}
+
 	var pageStr = values.Get("page")
-	page, err := strconv.Atoi(pageStr)
+	page, err = strconv.Atoi(pageStr)
 	if err != nil {
-		log.Panicln("page parse failed", err)
+		log.Panic("wrong parameter page")
 	}
+	if page <= 0 {
+		page = defaultPage
+	}
+
 	var limitStr = values.Get("limit")
-	limit, err := strconv.Atoi(limitStr)
+	limit, err = strconv.Atoi(limitStr)
 	if err != nil {
-		log.Panicln("limit parse failed", err)
+		log.Panic("wrong parameter limit")
 	}
+	if limit <= 0 {
+		limit = defaultLimit
+	}
+
 	return anchorId, page, limit
 }

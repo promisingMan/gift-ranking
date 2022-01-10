@@ -10,8 +10,8 @@ import (
 
 var sema = semaphore.NewWeighted(10)
 
-// GetMongodbSession 获取MongoDb连接会话，使用信号量限制最多同时10个协程访问连接
-func GetMongodbSession() *mgo.Session {
+// GetMongodbSessionBySemaphore 获取MongoDb连接会话，使用信号量限制最多同时10个协程访问连接
+func GetMongodbSessionBySemaphore() *mgo.Session {
 	err := sema.Acquire(context.TODO(), 1)
 	if err != nil {
 		log.Panicln("acquire semaphore failed", err)
@@ -26,8 +26,8 @@ func GetMongodbSession() *mgo.Session {
 
 var bufChannel = make(chan struct{}, 10)
 
-// GetMongodbSession1 获取MongoDb连接会话，使用管道限制最多同时10个协程访问连接
-func GetMongodbSession1() *mgo.Session {
+// GetMongodbSession 获取MongoDb连接会话，使用管道限制最多同时10个协程访问连接
+func GetMongodbSession() *mgo.Session {
 	bufChannel <- struct{}{}
 	session, err := mgo.Dial(config.AppConfig.MongoDb.Address)
 	if err != nil {

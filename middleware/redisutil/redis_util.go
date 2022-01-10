@@ -2,7 +2,6 @@ package redisutil
 
 import (
 	"github.com/go-redis/redis"
-	"log"
 	"ranking/config"
 )
 
@@ -17,8 +16,5 @@ func GetRedisClient() *redis.Client {
 }
 
 func Close(client *redis.Client) {
-	err := client.Close()
-	if err != nil {
-		log.Panicln("close redis client failed", err)
-	}
+	_ = client.Close()
 }

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"gopkg.in/mgo.v2/bson"
 	"log"
 	"ranking/config"
@@ -25,17 +26,19 @@ type GiftRecDto struct {
 
 const COLLECTION = "gift_rec_record"
 
-func SaveGiftRecRecord(record GiftRecRecord) {
+func SaveGiftRecRecord(record GiftRecRecord) error {
 	session := mongodb.GetMongodbSession()
 	defer mongodb.CloseMongodbSession(session)
 	collection := session.DB(config.AppConfig.MongoDb.Database).C(COLLECTION)
 	err := collection.Insert(record)
 	if err != nil {
-		log.Panicln("save gift receive record failed", err)
+		log.Println("failed to save gift receive record failed", err)
+		return err
 	}
+	return nil
 }
 
-func GetGroupedGiftValue() []bson.M {
+func GetGroupedGiftValue() ([]bson.M, error) {
 	session := mongodb.GetMongodbSession()
 	defer mongodb.CloseMongodbSession(session)
 	collection := session.DB(config.AppConfig.MongoDb.Database).C(COLLECTION)
@@ -46,12 +49,12 @@ func GetGroupedGiftValue() []bson.M {
 	var res []bson.M
 	err := pipe.All(&res)
 	if err != nil {
-		log.Panicln("get grouped gift value failed", err)
+		log.Println("failed to get grouped gift value ", err)
 	}
-	return res
+	return res, err
 }
 
-func GetGiftRecRecordListByAnchorId(anchorId, page, limit int) []GiftRecRecord {
+func GetGiftRecRecordListByAnchorId(anchorId, page, limit int) ([]GiftRecRecord, error) {
 	session := mongodb.GetMongodbSession()
 	defer mongodb.CloseMongodbSession(session)
 	collection := session.DB(config.AppConfig.MongoDb.Database).C(COLLECTION)
@@ -59,7 +62,7 @@ func GetGiftRecRecordListByAnchorId(anchorId, page, limit int) []GiftRecRecord {
 	var result []GiftRecRecord
 	err := iter.All(&result)
 	if err != nil {
-		log.Panicln("get gift receive record list by anchorId failed", err)
+		return nil, fmt.Errorf("failed to get gift receive record list by anchorId : %v", err)
 	}
-	return result
+	return result, nil
 }
