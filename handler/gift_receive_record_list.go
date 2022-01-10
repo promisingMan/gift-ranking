@@ -3,7 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
-	"ranking/model"
+	"ranking/model/gift"
 	"strconv"
 )
 
@@ -16,7 +16,7 @@ func GiftRecRecordList(w http.ResponseWriter, req *http.Request) {
 	}()
 	// 解析并校验入参
 	anchorId, page, limit := parseAndVerifyArgs(req)
-	result, err := model.GetGiftRecRecordListByAnchorId(anchorId, page, limit)
+	result, err := gift.GetGiftRecRecordListByAnchorId(anchorId, page, limit)
 	if err != nil {
 		Failure(w, err)
 	} else {

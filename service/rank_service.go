@@ -5,7 +5,7 @@ import (
 	"github.com/go-redis/redis"
 	"ranking/constant"
 	"ranking/middleware/redisutil"
-	"ranking/model"
+	"ranking/model/gift"
 )
 
 const FormatError = "failed to get rank : %v"
@@ -22,7 +22,7 @@ func GetRank() ([]redis.Z, error) {
 	}
 	// 如果key不存在
 	if len(result) == 0 {
-		res, err := model.GetGroupedGiftValue()
+		res, err := gift.GetGroupedGiftValue()
 		if err != nil {
 			err := fmt.Errorf(FormatError, err)
 			return nil, err

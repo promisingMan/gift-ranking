@@ -1,4 +1,4 @@
-package model
+package gift
 
 import (
 	"fmt"
@@ -9,16 +9,16 @@ import (
 	"time"
 )
 
-// GiftRecRecord 送礼流水记录mongo实体
-type GiftRecRecord struct {
+// RecRecord 送礼流水记录mongo实体
+type RecRecord struct {
 	AnchorId   int       `json:"anchorId" bson:"anchorId"`     // 主播id
 	Uid        int       `json:"uid" bson:"uid"`               // 用户id
 	GiftValue  int       `json:"giftValue" bson:"giftValue"`   // 礼物价值
 	CreateTime time.Time `json:"createTime" bson:"createTime"` // 送礼时间
 }
 
-// GiftRecDto 送礼入参接收实体
-type GiftRecDto struct {
+// RecDto 送礼入参接收实体
+type RecDto struct {
 	AnchorId  int `json:"anchorId"`  // 主播id
 	Uid       int `json:"uid"`       // 用户id
 	GiftValue int `json:"giftValue"` // 礼物价值
@@ -26,7 +26,7 @@ type GiftRecDto struct {
 
 const COLLECTION = "gift_rec_record"
 
-func SaveGiftRecRecord(record GiftRecRecord) error {
+func SaveGiftRecRecord(record RecRecord) error {
 	session := mongodb.GetMongodbSession()
 	defer mongodb.CloseMongodbSession(session)
 	collection := session.DB(config.AppConfig.MongoDb.Database).C(COLLECTION)
@@ -60,12 +60,12 @@ func GetGroupedGiftValue() ([]bson.M, error) {
 	return res, err
 }
 
-func GetGiftRecRecordListByAnchorId(anchorId, page, limit int) ([]GiftRecRecord, error) {
+func GetGiftRecRecordListByAnchorId(anchorId, page, limit int) ([]RecRecord, error) {
 	session := mongodb.GetMongodbSession()
 	defer mongodb.CloseMongodbSession(session)
 	collection := session.DB(config.AppConfig.MongoDb.Database).C(COLLECTION)
 	iter := collection.Find(bson.M{"anchorId": anchorId}).Sort("-createTime").Skip((page - 1) * limit).Limit(limit).Iter()
-	var result []GiftRecRecord
+	var result []RecRecord
 	err := iter.All(&result)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get gift receive record list by anchorId : %v", err)

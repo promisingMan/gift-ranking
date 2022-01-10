@@ -4,20 +4,20 @@ import (
 	"github.com/go-redis/redis"
 	"ranking/constant"
 	"ranking/middleware/redisutil"
-	"ranking/model"
+	"ranking/model/gift"
 	"strconv"
 	"time"
 )
 
-func GiveGift(giftRecDto model.GiftRecDto) error {
+func GiveGift(giftRecDto gift.RecDto) error {
 	// 转换成mongo实体并入库
-	record := model.GiftRecRecord{
+	record := gift.RecRecord{
 		AnchorId:   giftRecDto.AnchorId,
 		Uid:        giftRecDto.Uid,
 		GiftValue:  giftRecDto.GiftValue,
 		CreateTime: time.Now(),
 	}
-	err := model.SaveGiftRecRecord(record)
+	err := gift.SaveGiftRecRecord(record)
 	if err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func GiveGift(giftRecDto model.GiftRecDto) error {
 	defer redisutil.Close(redisClient)
 	exists := redisClient.Exists(constant.RankRedisKey)
 	if exists.Val() == 0 {
-		res, err := model.GetGroupedGiftValue()
+		res, err := gift.GetGroupedGiftValue()
 		if err != nil {
 			return err
 		}
