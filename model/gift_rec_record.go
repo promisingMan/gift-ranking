@@ -38,9 +38,15 @@ func SaveGiftRecRecord(record GiftRecRecord) error {
 	return nil
 }
 
+var rateLimit = make(chan struct{}, 10)
+
 func GetGroupedGiftValue() ([]bson.M, error) {
+	rateLimit <- struct{}{}
 	session := mongodb.GetMongodbSession()
-	defer mongodb.CloseMongodbSession(session)
+	defer func() {
+		mongodb.CloseMongodbSession(session)
+		<-rateLimit
+	}()
 	collection := session.DB(config.AppConfig.MongoDb.Database).C(COLLECTION)
 	pipe := collection.Pipe([]bson.M{
 		{"$group": bson.M{"_id": "$anchorId", "Score": bson.M{"$sum": "$giftValue"}}},
